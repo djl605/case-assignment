@@ -1,0 +1,223 @@
+/* TO DO NEXT TIME 
+
+  - style inputs
+
+*/
+
+
+@import url('/reset.css');
+
+@import url('https://rsms.me/inter/inter-ui.css');
+
+/* CORE STYLES */ 
+
+.manuscript-logo {
+  width: 118px;
+  height: 145px;
+}
+
+body { 
+  font-size: 100%; /* makes relative units easier to work with */
+  font-family: 'Inter UI', Helvetica, Arial, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction:column;
+  height: 100vh;
+  color: #121;
+}
+
+header {
+  text-align: center;
+}
+
+main {
+  margin-bottom: 15em;
+}
+
+    /* Old way to center horizontally:
+        width: 500px;
+        margin: 0 auto;
+
+    Flexbox lets you do vertical centering
+    */
+
+a {
+  color: #0B45D9;
+  text-decoration: none;
+}
+
+.kiwi-logo {
+  width: 125px;
+  height: 125px;
+}
+
+h1 {
+  font-size: 175%;
+  font-weight: 500;
+  margin-bottom: .5em;
+}
+
+h2 {
+  font-size: 125%;
+  margin-bottom: 2em;
+  text-align: center;
+}
+
+h3 {
+  font-size: 115%;
+  margin-bottom: 1em;
+  text-align: center;
+}
+
+h3 sub {
+  font-size: 65%;
+  vertical-align: sub;
+}
+
+/* END CORE STYLES */ 
+
+
+/* INPUTS */
+
+.authentication {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction:column;
+  max-width: 50%;
+  margin: 0 auto;
+}
+
+.authentication-form {
+  display: grid;
+  grid-template-columns: 1fr 3fr 1fr;
+  grid-column-gap: 5px;
+  grid-row-gap: 15px;
+  margin-bottom: .65em;
+}
+
+.authentication-form * {
+  align-self: center;
+}
+
+.authentication-form .input {
+  margin: 0;
+}
+
+.input {
+  width: 36em;
+  font-size: 115%;
+  border: 0;
+  color: black;
+  background: #eaeaea;
+  border-radius: 4px;
+  padding: .5em;
+  margin-bottom: .65em;
+  outline-color: #0B45D9;
+  margin-right: .75em;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+.input.invalid {
+  border: solid 2px red;
+}
+
+.authentication select.input {
+  width: -moz-fit-content;
+  width: fit-content;
+  font-size: 115%;
+  margin-right: 0.2em;
+  padding: 0.5em;
+  box-shadow: 3px 3px;
+}
+
+
+.auth-token {
+  grid-column-start: 2;
+  grid-column-end: 3;
+}
+
+/* http://caniuse.com/#feat=css-placeholder */
+.auth-token::placeholder {
+  color: gray;
+}
+
+button {
+  font-size: 115%;
+  font-weight: 500;
+  padding: .5em;
+  border: 0;
+  background: #0B45D9;
+  color: #fff;
+  border-radius: 4px;
+  margin-bottom: 1em;
+  margin-right: 1em;
+  margin-left: 1em;
+}
+
+button:disabled {
+  opacity: .25;
+  cursor: not-allowed;
+}
+
+
+.api-learn {
+  padding-left: .5em;
+  text-align: center;
+  line-height: 1.5em;
+}
+
+.highlight {
+  background: #c5b8f4;
+}
+
+/* END INPUTS */
+
+
+.user, .shares-buttons, .total-shares {
+  display: flex;
+  justify-content: center;
+}
+
+
+.user-shares input {
+  width: 2em;
+}
+
+.site-data {
+  display: flex;
+  flex-direction: column;
+  color: #a17e55;
+  max-width: fit-content;
+  font-size: 85%;
+}
+
+.site-data h3 {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.site-data input, .site-data select {
+  padding: 0;
+  width: 20em;
+  margin-bottom: 0;
+}
+
+.site-data button {
+  margin: 0;
+  font-size: 85%;
+}
+
+.site-data button.change-ufg {
+  margin-left: .75em;
+  font-size: 65%;
+}
+
+
+.site-data-value {
+  margin-left: .3em;
+  color: black;
+}
