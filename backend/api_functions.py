@@ -5,9 +5,7 @@ from printing_functions import debug
 from fogbugz import FogBugz, FogBugzAPIError
 _url = os.environ['FOGBUGZ_URL']
 _token = os.environ['FOGBUGZ_ADMIN_TOKEN']
-_holidayToken = os.environ['FOGBUGZ_HOLIDAY_TOKEN']
 _fb = FogBugz(_url, _token)
-_fbHoliday = FogBugz(_url, _holidayToken)
 
 
 
@@ -79,7 +77,7 @@ def timeWithinWorkingSchedule(ixPerson, time):
 
 
 def getUpcomingHolidays(ixPerson):
-  result = _fbHoliday.listUpcomingHolidays(ixPerson=ixPerson)
+  result = _fb.listUpcomingHolidays(ixPerson=ixPerson)
   holidays = []
   for holiday in result.holidays:
     holidays.append({

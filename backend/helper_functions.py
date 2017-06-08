@@ -17,7 +17,7 @@ def validateUser(sFullName):
 
 
 def getRandomAssignment(bug, dtDue):
-  with open('data/user_shares.json', 'r') as f:
+  with open('.data/user_shares.json', 'r') as f:
     userShares = json.loads(f.read())
   
   now = datetime.utcnow()

@@ -64,7 +64,7 @@ def getUserShares():
   if not isAdmin:
     return error, status.HTTP_403_FORBIDDEN
   
-  return send_from_directory('../data', 'user_shares.json')
+  return send_from_directory('../.data', 'user_shares.json')
 
 
 
@@ -86,7 +86,7 @@ def updateShares():
     if not validateUser(item['name']):
       return item['name'] + " is not a valid FogBugz user. If this user has been entered recently, you may need to hit the updateStoredUsers page.", status.HTTP_400_BAD_REQUEST
   
-  with open('data/user_shares.json', 'w') as f:
+  with open('.data/user_shares.json', 'w') as f:
     f.write(json.dumps(shares))
     
   return "OK", status.HTTP_200_OK
