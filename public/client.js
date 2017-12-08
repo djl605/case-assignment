@@ -6,158 +6,167 @@
 
 $(function() {
   let fbUsers;
-
-  function dropdownOfUsers() {
-    let html = '<select name="person"">';
-    for (let i in fbUsers) {
-      const name = fbUsers[i].name;
-      const ixPerson = fbUsers[i].ixPerson;
-      html += '<option value="' + ixPerson + '">' + name + '</option>';
-    }
-    html += '</select>';
-    return html;
-  }
   
-  const $tokenEntryButton = $("#token-entry button");
+  const $tokenEntryButton = $(".auth-button");
   $tokenEntryButton.on('click', tokenEntryButtonHandler);
   
-  const $tokenEntryInput = $("#token-entry input");
-  $tokenEntryInput.on('keyup', function(e) {
+  const $authInput = $(".authentication input");
+  $authInput.on('keyup', function(e) {
     if (e.keyCode == 13) {
       tokenEntryButtonHandler();
     }
   });
-  $tokenEntryInput.focus();
+  $authInput.focus();
   
   function tokenEntryButtonHandler() {
     $tokenEntryButton.prop('disabled', true);
-    const token = {"token": $('#token-entry input').val()};
+    const data = {"token": $('.auth-token').val(), "url": $('.auth-url').val(), "protocol": $('.auth-url-protocol').val()};
     
-    $.getJSON('/fogbugzUsers', token, function(users) {
+    $.getJSON('/fogbugzUsers', data, function(users) {
       fbUsers = users;
     })
       .done(function() {
-        displayEverything(token);
+        displayEverything(data);
       })
       .fail(function (jqXHR, error) {
-        alert('Invalid token');
-        $tokenEntryButton.prop('disabled', false);
+        if (jqXHR.status === 403) {
+          alert('Invalid token');
+          $tokenEntryButton.prop('disabled', false);
+        }
+        else if(jqXHR.status === 404) {
+          promptForBotToken(data);
+        }
       });
 
   }
   
+  function promptForBotToken(data) {
+    $('.authentication').hide();
+    
+  }
+  
+  function ObservableShare(share) {
+    // creates an observable viewmodel for a "share"
+    return {
+      shares: window.ko.observable(share.shares),
+      ixPerson: window.ko.observable(share.ixPerson)
+    };
+  }
+  
+  function sumShares() {
+    var total = 0;
+    var shares = this.shares(); // `this` is the ViewModel
+    for (var ix = 0; ix < shares.length; ++ix){
+      var user = shares[ix];
+      total += parseInt(user.shares() || 0, 10);
+    }
+    return total;
+  }
+  
+  function lookupUser(ixPerson) {
+    for (let i = 0; i < fbUsers.length; i++) {
+      if (fbUsers[i].ixPerson == ixPerson) {
+        return fbUsers[i].name;
+      }
+    }
+    return 'INVALID TOKEN';
+  }
+    
   function displayEverything(token) {
-    $('#token-entry').hide();
-    $('#add-user').show();
+    $('.authentication').hide();
     $('#form-div').show();
-    $.getJSON('/userShares', token, function(shares) {
-      for (const i in shares) {
-        const html = '<div class="user" style="display:table;">' + 
-                        '<div style="display:table-cell">' + 
-                          dropdownOfUsers() +
-                        '</div>' + 
-                        '<div style="display:table-cell">' +
-                          '<input type="number" name="shares" style="width: 40px; position: relative; left: 10px;">' +
-                        '</div>' +
-                        '<div style="display:table-cell">' +
-                          '<button type="button" style="position: relative; left: 15px;">Remove</button>' +
-                        '</div>'
-                      '</div>';
-        const $userShare = $(html);
-          
-        const $dropdown = $userShare.find('[name="person"]');
-        $dropdown.val(shares[i].ixPerson);
-        $dropdown.on('change', showSaveButton)
+    $.getJSON('/userShares', token, function(siteData) {
+      
+      // in Knockout/MVVM,
+      // * `shares` is model
+      // * `viewModel` is viewModel
+      // * <div id='shares-list'> is view
+      
+      var viewModel = {
+        url: siteData['url'],
+        uniqueID: siteData['unique_id'],
+        ufgUser: window.ko.observable('CHECKING'),
+        validToken: function() {
+          let validToken = viewModel.ufgUser() != 'CHECKING' && viewModel.ufgUser() != 'INVALID TOKEN';
+          if (validToken) {
+            $('#token-input').removeClass('invalid');
+          } else {
+            $('#token-input').addClass('invalid');
+          }
+          return validToken;
+        },
+        updateToken: function() {
+          viewModel.ufgUser('CHECKING');
+          token['ufgToken'] = viewModel.token();
+          $.ajax({
+            url: '/updateToken',
+            type: 'POST',
+            data: JSON.stringify(token),
+            contentType: 'application/json; charset=utf-8'
+          })
+            .done(function(data) {
+              const ixPerson = data['ixPerson'];
+              if (ixPerson == -1) {
+                viewModel.ufgUser("INVALID TOKEN")
+              }
+              else {
+                const userName = lookupUser(ixPerson);
+                viewModel.ufgUser(userName);  
+              }
+            })
 
-        const $shares = $userShare.find('[name="shares"]');
-        $shares.val(shares[i].shares);
-        $shares.on('input', showSaveButton);
+        },
+        token: window.ko.observable(siteData['token']),
+        shares: window.ko.observableArray(siteData['shares'].map(ObservableShare)),
+        users: fbUsers,
+        totalShares: sumShares,
+        addUser: function() {
+          let observableShare = ObservableShare({shares: 0, ixPerson: fbUsers[0].ixPerson});
+          observableShare.shares.subscribe(viewModel.enableSaveButton);
+          observableShare.ixPerson.subscribe(viewModel.enableSaveButton);
+          viewModel.shares.push(observableShare);
+        },
+        removeUser: function() {
+          viewModel.shares.remove(this);
+        },
+        save: function() {
+          const dataList = viewModel.shares().map(share => ({shares: share.shares(), ixPerson: share.ixPerson()}));
+          const data = {token: token['token'], url: token['url'], ufg_token: viewModel.token(), protocol: token['protocol'], data: dataList}
+          viewModel.disableSaveButton();
+
+          $.ajax({
+            url: '/updateShares',
+            type: 'POST',
+            data: JSON.stringify(data),
+            contentType: 'application/json; charset=utf-8'
+          })
+            .fail(function(jqXHR, error) {
+              alert(jqXHR.responseText);
+              viewModel.enableSaveButton();
+            });
+
+        },
+        enableSaveButton: function() {
+          viewModel.saveButton(true);
+        },
+        disableSaveButton: function() {
+          viewModel.saveButton(false);
+        },
+        saveButton: window.ko.observable(false)
+      };
       
-        const $removeButton = $userShare.find('button');
-        $removeButton.on('click', removeButtonHandler);
-        
-        const $sharesList = $('#shares-list');
-        $sharesList.append($userShare);
-      
-      }
-    });
-  
-    function removeButtonHandler() {
-      const $button = $(this);
-      const $mainElement = $button.parents('#shares-list div');
-      $mainElement.remove();
-      showSaveButton();
-    }
-  
-    function showSaveButton() {
-      $("#save-button").prop('disabled', false).show();
-    }
-  
-    $("#add-user").on("click", function () {
-      const html = '<div class="user" style="display:table;">' + 
-                        '<div style="display:table-cell">' + 
-                          dropdownOfUsers() +
-                        '</div>' + 
-                        '<div style="display:table-cell">' +
-                          '<input type="number" name="shares" style="width: 40px; position: relative; left: 10px;">' +
-                        '</div>' +
-                        '<div style="display:table-cell">' +
-                          '<button type="button" style="position: relative; left: 15px;">Remove</button>' +
-                        '</div>'
-                      '</div>';
-    
-      const $newUserShare = $(html);
-      const $shares = $newUserShare.find('[name="shares"]');
-      $shares.val(0);
-          
-      const $removeButton = $newUserShare.find('button');
-      $removeButton.on('click', removeButtonHandler);
-    
-      const $dropdown = $newUserShare.find('[name="person"]');
-      $dropdown.val(null);
-        
-      const $sharesList = $('#shares-list');
-      $sharesList.append($newUserShare);
-        
-      showSaveButton();
-    });
-  
-    $("#save-button").on('click', function () {
-      $(this).prop('disabled', true);
-      const dataList = []
-      const $users = $(".user");
-      for (let i = 0; i < $users.length; ++i) {
-        const $user = $($users[i]);
-        const ixPerson = parseInt($user.find('[name="person"]').val());
-        if (!ixPerson) {
-          continue;
-        }
-        const sFullName = $user.find('[name="person"] option:selected').text();
-        const shares = parseInt($user.find('[name="shares"]').val());
-        dataList.push({
-          "name": sFullName,
-          "shares": shares,
-          "ixPerson": ixPerson
-        });
-      }
-          
-      const data = {token: token['token'], data: dataList}
-    
-      $.ajax({
-        url: '/updateShares',
-        type: 'POST',
-        data: JSON.stringify(data),
-        contentType: 'application/json; charset=utf-8'
+      viewModel.updateToken();
+      viewModel.shares.subscribe(viewModel.enableSaveButton);
+      let observableShares = viewModel.shares();
+      $.each(observableShares, function(i) {
+        observableShares[i].shares.subscribe(viewModel.enableSaveButton);
+        observableShares[i].ixPerson.subscribe(viewModel.enableSaveButton);
       })
-        .done(function() {
-          $("#save-button").hide();
-        })
-        .fail(function(jqXHR, error) {
-          alert(jqXHR.responseText);
-          $('#save-button').prop('disabled', false);
-        });
+      
+      window.ko.applyBindings(viewModel, document.getElementById('shares-page'));
+      
     });
-        
+  
   }
   
 });

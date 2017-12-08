@@ -1,58 +1,94 @@
-<!-- This is a static file -->
-<!-- served from your routes in server.js -->
-
-<!-- You might want to try something fancier: -->
-<!-- html/nunjucks docs: https://mozilla.github.io/nunjucks/ -->
-<!-- pug: https://pugjs.org/ -->
-<!-- haml: http://haml.info/ -->
-<!-- hbs(handlebars): http://handlebarsjs.com/ -->
-
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Case Assignment</title>
-    <meta name="description" content="An app for controlling random case assignment in FogBugz">
+    <title>Manuscript Case Assignment</title>
+    <meta name="description" content="An app for controlling random case assignment in Manuscript">
     <link id="favicon" rel="icon" href="https://cdn.glitch.com/939156d9-94c9-4365-80d7-f7200939116f%2Ffc-mark.jpg?1491420864680" type="image/x-icon">
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" type="text/css" href="/style.css">
   </head>
   <body>
     <header>
+      
+      <img src="https://cdn.glitch.com/939156d9-94c9-4365-80d7-f7200939116f%2Fmanuscript-logo-mark.svg?1512663712035" class="manuscript-logo">
+      
       <h1>
-        Case Assignment
+        Manuscript Case Assignment
       </h1>
     </header>
 
     <main>
-      <h2>User Shares</h2>
+      <h2>An app for controlling random case assignment in Manuscript, made by <a href="https://fogcreek.com">Fog Creek</a></h2>
 
-      <div id="token-entry">
-        <div style="display:table;">
-          <div style="display:table-cell">
-            <input type="text" style="width:250px;" placeholder="admin token">
+      <div class="authentication">
+        <div class="authentication-form">
+          <select class="input auth-url-protocol">
+            <option value="http://">http://</option>
+            <option value="https://" selected>https://</option>
+          </select>
+          <input class="input auth-url" type="text" placeholder="Insert your Manuscript URL here" autofocus>
+          <span>/api.asp</span>
+          <input class="input auth-token" type="password" placeholder="Insert Manuscript administrator API token here">
+        </div>
+        <button type="button" class="auth-button">
+          Authenticate
+        </button>
+        <p class="api-learn">
+          <span class="highlight">Your admin API token is only used for authentication and will not be stored.</span><br>Don't know how to get an API token? <a href="http://help.fogcreek.com/8447/how-to-get-a-fogbugz-xml-api-token">Learn here</a>.
+        </p>
+      </div>
+
+      <!-- This element uses Knockout binding: -->
+      <div id="shares-page">
+        <div class="site-data" style="display: none" data-bind="visible: true">
+          <h3>Your Manuscript URL: <span data-bind="text: url" class="site-data-value"></span></h3>
+          <h3>Send webhooks to: <span class="site-data-value">https://case-assignment.glitch.me/<span data-bind="text: uniqueID"></span>/case-edit <sub>{POST or Bundled POST}</sub></span></h3>
+          <h3>"Up For Grabs" user: <span class="site-data-value" data-bind="text: ufgUser"></span></h3>
+          <h3>"Up For Grabs" user API token: <input type="password" data-bind="value: token" id="token-input" class="site-data-value input invalid"><button data-bind="click: updateToken">Update Token</button></h3>
+        </div>
+        <div id="shares-list-and-buttons" style="display: none" data-bind="visible: validToken()">
+          <div id="shares-list" data-bind="foreach: shares">
+            <div class="user"> 
+              <div class="user-name">
+                <select name="person"
+                        class="input"
+                        data-bind="options: $root.users,
+                                      optionsValue: 'ixPerson',
+                                      optionsText: 'name',
+                                      value: ixPerson">
+                </select>
+              </div>
+              <div class="user-shares">
+                <input class="input" type="number" min="0" name="shares" data-bind="value: shares">
+              </div>
+              <div class="user-remove">
+                <button type="button" data-bind="click: $root.removeUser">Remove</button>
+              </div>
+            </div>
           </div>
-          <div style="display:table-cell">
-            <button type="button" style="position: relative; left: 15px;">
-              OK
+
+          <div class="shares-buttons">
+            <button id="add-user" data-bind="click: addUser">
+              Add User
+            </button>
+            <button id="save-button" data-bind="enable: saveButton, click: save">
+              Save Changes
             </button>
           </div>
+          <p class="total-shares">
+            Total shares: <span data-bind="text: totalShares()"></span>
+          </p>
         </div>
+
       </div>
-      <div id="shares-list"></div>
-      <button id="add-user" hidden>
-        Add User
-      </button>
-      <button id="save-button" hidden>
-        Save Changes
-      </button>
 
     </main>
 
     <footer>
-      <a href="https://glitch.com/edit/#!/case-assignment">
-        Remix this in Glitch
+      <a href="https://glitch.com/edit/#!/remix/case-assignment">
+        <img src="https://cdn.glitch.com/2703baf2-b643-4da7-ab91-7ee2a2d00b5b%2Fremix-button.svg" alt="Remix on Glitch" />
       </a>
     </footer>
 
@@ -60,7 +96,7 @@
     <script src="https://code.jquery.com/jquery-2.2.1.min.js"
             integrity="sha256-gvQgAFzTH6trSrAWoH1iPo9Xc96QxSZ3feW6kem+O00="
             crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.4.2/knockout-min.js"></script>
     <script src="/client.js"></script>
-
   </body>
 </html>

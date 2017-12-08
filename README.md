@@ -14,36 +14,6 @@ The Up For Grabs User, or UFG, is the user you will assign a case to when you wa
 1. Add a user from that page
 1. To get the ixPerson value for this user (which you'll need later), click on the "Edit" button next to the user on the user list. The URL of the page you are taken to will end in a number. That number is the ixPerson value.
 
-## Tell the case assignment app about your FogBugz site
-
-The first thing you'll need to do to get case assignment working is remix this project in Glitch. Once you've done that, edit the `.env` file with details about your FogBugz site:
-
-1. `FOGBUGZ_URL`: Pretty self-explanatory. Set this to the URL of your FogBugz site. For example:
-> - FogBugz On Demand: `https://example.fogbugz.com`
-> - FogBugz On Site: `https://fogbugz.mycompany.com`
-> - FogBugz For Your Server: `https://my.company.com/fogbugz`
-
-2. `FOGBUGZ_ADMIN_TOKEN`: Have a FogBugz administrator create an API token and paste it here. Instructions for generating an API token can be found on the [Fog Creek help site](http://help.fogcreek.com/8447/how-to-get-a-fogbugz-xml-api-token).
-
-1. `UFG_USER`: This is the ixPerson value for your "Up For Grabs" user which you got before.
-
-An example `.env` file might look like this:
-
-```
-# Environment Config
-
-# store your secrets and config variables in here
-# only invited collaborators will be able to see your .env values
-
-# reference these in your code with process.env.SECRET
-
-FOGBUGZ_URL=https://example.fogbugz.com
-FOGBUGZ_ADMIN_TOKEN=atlswfgbrcg41ps4ooqleq6169pppa
-UFG_USER=46
-
-# note: .env is a shell file so there can't be spaces around =
-```
-
 
 # Setting Up Shares
 
@@ -81,17 +51,20 @@ Once you are on the webhook configuration page, create a new webhook.
 
 - In the URL field, type the following:
 
-> https://**case-assignment**.glitch.me/hooks?ixBug={CaseNumber}&dueDate={DueDate}
+> https://case-assignment.glitch.me/hooks?ixBug={CaseNumber}&dueDate={DueDate}&url=**<fogbugz_url>**
 
-> Replace "case-assignment" with the name of your remixed Glitch project.
+> Replace **<fogbugz_url>** with the base URL of your FogBugz account. For example:
+> - FogBugz On Demand: `https://example.fogbugz.com`
+> - FogBugz On Site: `https://fogbugz.mycompany.com`
+> - FogBugz For Your Server: `https://my.company.com/fogbugz`
 
 - Set the Hook Type to "GET"
 
 - Set the Filter field to:
 
-> AssignedToId = "N"
+> AssignedToId = **<N>**
 
-> (replace N with the ixPerson number of your UFG user. The number must be in quotes.)
+> (replace **<N>** with the ixPerson number of your UFG user. The number must be in quotes.)
 
 - You can give the webhook any name you want; "UFG" is a good option.
 
@@ -100,7 +73,9 @@ Once you are on the webhook configuration page, create a new webhook.
 
 # That's It!
 
-Case assignment is now configured! Any time you want to change the shares around, you can come back to your project and make the changes the way you did when you originally set them.
+Case assignment is now configured! Any time you want to change the shares around, you can come back to your project and make the changes the way you did when you originally set them. To have a case randomly assigned, just assign it to the UFG user.
+
+Note that it may take up to a minute for the case to be randomly assigned after assigning to UFG. This is due to the asynchronous nature of FogBugz webhooks, meaning the webhook may not fire until a few moments after the case is edited.
 
 
 # Support
