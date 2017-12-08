@@ -85,7 +85,6 @@ def updateShares():
       old_share.delete()
       
   site_data.shares = new_user_shares
-  site_data.token = data['ufg_token']
   site_data.save()
 
   return "OK", status.HTTP_200_OK

@@ -163,6 +163,7 @@ button:disabled {
   cursor: not-allowed;
 }
 
+
 .api-learn {
   padding-left: .5em;
   text-align: center;
@@ -209,6 +210,12 @@ button:disabled {
   margin: 0;
   font-size: 85%;
 }
+
+.site-data button.change-ufg {
+  margin-left: .75em;
+  font-size: 65%;
+}
+
 
 .site-data-value {
   margin-left: .3em;

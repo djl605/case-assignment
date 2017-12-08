@@ -71,6 +71,16 @@ $(function() {
     }
     return 'INVALID TOKEN';
   }
+  
+  function validToken(viewModel) {
+    let validToken = viewModel.ufgUser() != 'CHECKING' && viewModel.ufgUser() != 'INVALID TOKEN';
+    if (validToken) {
+      $('#token-input').removeClass('invalid');
+    } else {
+      $('#token-input').addClass('invalid');
+    }
+    return validToken;
+  }
     
   function displayEverything(token) {
     $('.authentication').hide();
@@ -86,16 +96,12 @@ $(function() {
         url: siteData['url'],
         uniqueID: siteData['unique_id'],
         ufgUser: window.ko.observable('CHECKING'),
-        validToken: function() {
-          let validToken = viewModel.ufgUser() != 'CHECKING' && viewModel.ufgUser() != 'INVALID TOKEN';
-          if (validToken) {
-            $('#token-input').removeClass('invalid');
-          } else {
-            $('#token-input').addClass('invalid');
-          }
-          return validToken;
-        },
+        editingUfg: window.ko.observable(false),
+        changeUfg: function() {viewModel.editingUfg(true);},
+        shouldShowShares: function() {return !viewModel.editingUfg() && validToken(viewModel);},
+        shouldShowTokenEntry: function() {return viewModel.editingUfg();},
         updateToken: function() {
+          viewModel.editingUfg(false);
           viewModel.ufgUser('CHECKING');
           token['ufgToken'] = viewModel.token();
           $.ajax({
