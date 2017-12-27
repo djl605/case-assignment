@@ -52,13 +52,15 @@ def generate_uid():
   return uid
 
   
-def process_event(event, shares, ufg_person, fb):
+def process_event(event, shares, fb):
   if not event['eventtype'].lower().startswith('case'):
     return
   
   bug = event['casenumber']
   
+  ufg_person = getUfgUser(fb)
   ixPersonAssignedTo, sDtDue = findCaseDetails(bug, fb)
+  debug('ufg_person = ' + str(ufg_person) + ' ixPersonAssignedTo = ' + str(ixPersonAssignedTo))
   if ixPersonAssignedTo == None:
     return False
   if int(ixPersonAssignedTo) != ufg_person:

@@ -42,7 +42,8 @@ def sendHTMLFile(path):
 def getUserShares():
   userToken = request.args.get("token")
   url = request.args.get('protocol') + request.args.get('url')
-  isValid, isAdmin, error, ixPerson = validateToken(getFogBugzConnection(url, userToken))
+  fb = getFogBugzConnection(url, userToken)
+  isValid, isAdmin, error, ixPerson = validateToken(fb)
   if not isAdmin:
     return error, status.HTTP_403_FORBIDDEN
   
@@ -53,6 +54,7 @@ def getUserShares():
 
   protocol = request.args.get('protocol')
   #token = request.args.get('ufg_token')
+  verifyUfgUser(fb)
   new_site = SiteData(url=url, is_https = (True if protocol == 'https://' else False), unique_id=generate_uid())
   new_site.save()
   
@@ -135,17 +137,17 @@ def hook(uid):
   shares = site_data.shares
   debug(url)
   fb = getFogBugzConnection(url, token)
-  is_valid, is_admin, error, ufg_person = validateToken(fb)
+  is_valid, is_admin, error, assignment_person = validateToken(fb)
   if not is_valid:
     return 'The case assignment API token is invalid. Please update it at https://case-assignment.glitch.me', status.HTTP_403_FORBIDDEN
   events = request.get_json()
   try:
-    process_event(events, shares, ufg_person, fb)
+    process_event(events, shares, fb)
     return 'Assigned 1 case'
   except TypeError:
     count = 0
     for event in events:
-      if process_event(event, shares, ufg_person, fb):
+      if process_event(event, shares, fb):
         count += 1
         
     return 'Assigned ' + str(count) + ' case' + ('s' if count > 1 else '')

@@ -41,6 +41,18 @@ def getFBUsers(fb):
     
   return users
 
+def getUfgUser(fb):
+  response = fb.listPeople(fIncludeVirtual=1, fIncludeActive=1, fIncludeDeleted=1)
+  for person in response.people:
+    if person.sFullName.string.lower() == 'up for grabs':
+      return int(person.ixPerson.string)
+  return -1
+
+def verifyUfgUser(fb):
+  if getUfgUser(fb) == -1:
+    fb.newPerson(sEmail='example@example.com', sFullName='Up For Grabs', nType=3)
+
+
 
 
 def personAvailableOnDate(ixPerson, dueDate, fb):
