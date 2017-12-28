@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Manuscript Case Assignment</title>
+    <meta name="description" content="An app for controlling random case assignment in Manuscript">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link id="favicon" rel="icon" href="https://cdn.glitch.com/939156d9-94c9-4365-80d7-f7200939116f%2Ffc-mark.jpg?1491420864680" type="image/x-icon">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="/style.css">
+  </head>
+  <body>
+    <header>
+      
+      <img src="https://cdn.glitch.com/939156d9-94c9-4365-80d7-f7200939116f%2Fmanuscript-logo-mark.svg?1512663712035" class="manuscript-logo">
+      
+      <h1>
+        Manuscript Case Assignment
+      </h1>
+    </header>
+
+    <main>
+      <h2>An app for controlling random case assignment in Manuscript, made by <a href="https://fogcreek.com">Fog Creek</a></h2>
+
+      <!-- This element uses Knockout binding: -->
+      <div id="shares-page">
+        <div class="site-data">
+          <h3>Your Manuscript URL: <span class="site-data-value" id="site-url">{{ url }}</span></h3>
+          <h3>Send webhooks to: <span class="site-data-value">https://case-assignment.glitch.me/{{ unique_id }}/case-edit <sub>{POST or Bundled POST}</sub></span></h3>
+          <h3 title="This is the user who assigns a case to someone after it has been assigned to UFG">Assigning user: <span class="site-data-value" data-bind="text: ufgUser">CHECKING</span><button class="change-ufg" data-bind="visible: !editingUfg(), click: changeUfg">Change</button></h3>
+          <h3 style="display: none" data-bind="visible: shouldShowTokenEntry()">Assigning user API token: <input type="password" data-bind="value: token" id="token-input" class="site-data-value input invalid"><button data-bind="click: updateToken">Update Token</button></h3>
+          <span style="display: none" id="user-token">{{ user_token }}</span>
+          <span style="display: none" id="site-protocol">{{ protocol }}</span>
+        </div>
+        <div id="shares-list-and-buttons" style="display: none" data-bind="visible: shouldShowShares()">
+          <div id="shares-list" data-bind="foreach: shares">
+            <div class="user"> 
+              <div class="user-name">
+                <select name="person"
+                        class="input"
+                        data-bind="options: $root.users,
+                                      optionsValue: 'ixPerson',
+                                      optionsText: 'name',
+                                      value: ixPerson">
+                </select>
+              </div>
+              <div class="user-shares">
+                <input class="input" type="number" min="0" name="shares" data-bind="value: shares">
+              </div>
+              <div class="user-remove">
+                <button type="button" data-bind="click: $root.removeUser">Remove</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="shares-buttons">
+            <button id="add-user" data-bind="click: addUser">
+              Add User
+            </button>
+            <button id="save-button" data-bind="enable: saveButton, click: save">
+              Save Changes
+            </button>
+          </div>
+          <p class="total-shares">
+            Total shares: <span data-bind="text: totalShares()"></span>
+          </p>
+        </div>
+
+      </div>
+
+    </main>
+
+    <footer>
+      <a href="https://glitch.com/edit/#!/remix/case-assignment">
+        <img src="https://cdn.glitch.com/2703baf2-b643-4da7-ab91-7ee2a2d00b5b%2Fremix-button.svg" alt="Remix on Glitch" />
+      </a>
+    </footer>
+
+    <!-- Your web-app is https, so your scripts need to be too -->
+    <script src="https://code.jquery.com/jquery-2.2.1.min.js"
+            integrity="sha256-gvQgAFzTH6trSrAWoH1iPo9Xc96QxSZ3feW6kem+O00="
+            crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.4.2/knockout-min.js"></script>
+    <script src="/client.js"></script>
+  </body>
+</html>

@@ -48,7 +48,7 @@ def getUfgUser(fb):
       return int(person.ixPerson.string)
   return -1
 
-def verifyUfgUser(fb):
+def establishUfgUser(fb):
   if getUfgUser(fb) == -1:
     fb.newPerson(sEmail='example@example.com', sFullName='Up For Grabs', nType=3)
 
