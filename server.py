@@ -66,7 +66,7 @@ def login():
 
 @app.route("/siteData", methods=["POST"])
 @nocache
-def fogbugzUsers():
+def getSiteData():
   userToken = request.form["token"]
   url = request.form['url']
   protocol = request.form['protocol']
@@ -90,20 +90,15 @@ def fogbugzUsers():
 
 @app.route("/updateShares", methods=["POST"])
 def updateShares():
-  debug('here')
   userToken = request.form['token']
-  debug(userToken)
   url = request.form['protocol'] + request.form['url']
-  debug(url)
   fb = getFogBugzConnection(url, userToken)
   isValid, isAdmin, error, ixPerson = validateToken(fb)
   if not isAdmin:
     return error, status.HTTP_403_FORBIDDEN
 
-  debug('valid')
   
   shares = json.loads(request.form['data'])
-  debug(shares)
   new_user_shares = []
   for item in shares:
     debug(item)
