@@ -25,11 +25,14 @@ body {
   flex-direction:column;
   height: 100vh;
   color: #121;
+  position: relative;
+
 }
 
 header {
   text-align: center;
 }
+
 
 main {
   margin-bottom: 15em;
@@ -198,6 +201,7 @@ button:disabled {
   color: #a17e55;
   max-width: fit-content;
   font-size: 85%;
+  position: relative;
 }
 
 .site-data h3 {
@@ -216,9 +220,13 @@ button:disabled {
   font-size: 85%;
 }
 
-.site-data button.change-ufg {
-  margin-left: .75em;
+.site-data h3 button {
   font-size: 65%;
+}
+
+button#logout {
+  position: absolute;
+  right: 0;
 }
 
 
