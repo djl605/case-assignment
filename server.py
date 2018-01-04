@@ -6,26 +6,42 @@ from printing_functions import debug
 from nocache import nocache
 from schema import *
 
-from flask import Flask, request, send_from_directory, jsonify, render_template
+from flask import Flask, request, send_from_directory, jsonify, render_template, session, redirect, url_for
 from flask_api import status
 from flask import request
 app = Flask(__name__, static_url_path='')
 
 
 
-@app.route("/")
-def hello():
+@app.route("/", methods=["GET"])
+@nocache
+def index():
+  if 'userToken' in session:
+    siteData = SiteData.objects(url=session['url'])
+    if len(siteData) == 1:
+      # This site already exists in the DB
+      return render_template('configuration.html', url=session['url'], protocol=session['protocol'], unique_id=siteData[0].unique_id, user_token=session['userToken'])
+
+    establishUfgUser(fb)
+    unique_id = generate_uid()
+    new_site = SiteData(url=session['url'], is_https = (True if session['protocol'] == 'https://' else False), unique_id=unique_id)
+    new_site.save()
+
+    return render_template('configuration.html', url=session['url'], protocol=session['protocol'], unique_id=unique_id, user_token=session['userToken'])
+
   return send_from_directory('views', 'index.html')
 
 
 
 @app.route('/<path:path>.js')
+@nocache
 def sendJSFile(path):
   return send_from_directory('public', path + '.js')
 
 
 
 @app.route('/<path:path>.css')
+@nocache
 def sendCSSFile(path):
   return send_from_directory('public', path + '.css')
 
@@ -49,19 +65,16 @@ def login():
   if not isAdmin:
     return send_from_directory('views', 'incorrectpassword.html')
   
-  url = request.form['url']
-  protocol = request.form['protocol']
-  siteData = SiteData.objects(url=url)
-  if len(siteData) == 1:
-    # This site already exists in the DB
-    return render_template('configuration.html', url=url, protocol=protocol, unique_id=siteData[0].unique_id, user_token=userToken)
-  
-  establishUfgUser(fb)
-  unique_id = generate_uid()
-  new_site = SiteData(url=url, is_https = (True if protocol == 'https://' else False), unique_id=unique_id)
-  new_site.save()
+  session['userToken'] = userToken
+  session['url'] = request.form['url']
+  session['protocol'] = request.form['protocol']
+  return redirect(url_for('index'))
 
-  return render_template('configuration.html', url=url, protocol=protocol, unique_id=unique_id, user_token=userToken)
+@app.route('/logout')
+def logout():
+    # remove the username from the session if it's there
+    session.pop('userToken', None)
+    return redirect(url_for('index'))
 
 
 @app.route("/siteData", methods=["POST"])
@@ -165,4 +178,5 @@ def hook(uid):
 
 
 if __name__ == "__main__":
+  app.secret_key = environ['SESSION_KEY']
   app.run()
